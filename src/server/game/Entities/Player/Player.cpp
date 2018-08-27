@@ -22519,7 +22519,16 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
-    data.AppendPackedTime(GameTime::GetGameTime());
+    {
+        time_t t = GameTime::GetGameTime();
+        struct tm *tma = localtime(&t);
+        if (tma->tm_hour > 18)
+            t -= 12 * 60 * 60;
+        if (tma->tm_hour <= 6)
+            t += 12 * 60 * 60;
+
+        data.AppendPackedTime(t);
+    }
     data << float(0.01666667f);                             // game speed
     data << uint32(0);                                      // added in 3.1.2
     SendDirectMessage(&data);

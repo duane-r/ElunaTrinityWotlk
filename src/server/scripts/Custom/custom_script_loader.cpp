@@ -17,9 +17,13 @@
 
 // This is where scripts' loading functions should be declared:
 
+void AddSC_custom_feed_pet_heal();
+void AddSC_custom_make_instances_easier();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
+    AddSC_custom_feed_pet_heal();
+    AddSC_custom_make_instances_easier();
 }
