@@ -22,4 +22,4 @@ nbproject/*
 .vscode
 cmake-build-*/
 .vs
-*.swp
+*.user
