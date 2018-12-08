@@ -24,6 +24,6 @@ void AddSC_custom_make_instances_easier();
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
-    AddSC_custom_feed_pet_heal();
+    //AddSC_custom_feed_pet_heal();
     AddSC_custom_make_instances_easier();
 }

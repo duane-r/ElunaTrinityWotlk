@@ -12,6 +12,17 @@ class custom_make_instances_easier : public PlayerScript
 
     void OnDamage(Unit* attacker, Unit* victim, uint32& damage)
     {
+        /*
+        if (attacker && victim)
+        {
+            ObjectGuid ag = attacker->GetGUID();
+            if (ag.IsPlayer() && attacker->getClass() == CLASS_WARLOCK)
+            {
+                damage *= 3;
+            }
+        }
+        */
+
         if (!victim || !victim->GetMap()->IsDungeon())
             return;
 
@@ -19,10 +30,11 @@ class custom_make_instances_easier : public PlayerScript
         if (count > 3)
             return;
 
-        uint32 mult = 2;
-
-        if (count == 1)
-            mult = 3;
+        uint32 mult = 2.5;
+        if (count == 2)
+            mult = 2;
+        if (count == 3)
+            mult = 1.5;
 
         ObjectGuid vg = victim->GetGUID();
         if (vg.IsPlayer() || (vg.IsPet() && (victim->GetOwnerGUID()).IsPlayer()))
