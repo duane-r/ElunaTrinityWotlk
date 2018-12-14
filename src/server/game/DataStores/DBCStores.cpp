@@ -927,7 +927,7 @@ uint32 GetDefaultMapLight(uint32 mapId)
 
 SkillRaceClassInfoEntry const* GetSkillRaceClassInfo(uint32 skill, uint8 race, uint8 class_)
 {
-    if (skill == 46 && race == 1)
+    if (class_ == CLASS_HUNTER && race == 1 && (skill == 46 || skill == 173))
         race = 3;
 
     SkillRaceClassInfoBounds bounds = SkillRaceClassInfoBySkill.equal_range(skill);

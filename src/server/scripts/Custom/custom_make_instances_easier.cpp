@@ -30,15 +30,16 @@ class custom_make_instances_easier : public PlayerScript
         if (count > 3)
             return;
 
-        uint32 mult = 2.5;
+        float mult = 2.0;
         if (count == 2)
-            mult = 2;
-        if (count == 3)
             mult = 1.5;
+        if (count == 3)
+            mult = 1.25;
 
         ObjectGuid vg = victim->GetGUID();
         if (vg.IsPlayer() || (vg.IsPet() && (victim->GetOwnerGUID()).IsPlayer()))
         {
+            //printf("Normal damage %d\n", damage);
             damage /= mult;
             //printf("Player takes %d damage\n", damage);
             return;
@@ -50,6 +51,7 @@ class custom_make_instances_easier : public PlayerScript
         ObjectGuid ag = attacker->GetGUID();
         if (ag.IsPlayer() || (ag.IsPet() && (attacker->GetOwnerGUID()).IsPlayer()))
         {
+            //printf("Normal damage %d\n", damage);
             damage *= mult;
             //printf("Player deals %d damage\n", damage);
             return;
