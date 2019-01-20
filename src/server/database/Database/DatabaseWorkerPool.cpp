@@ -58,8 +58,8 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
     WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below 5.1");
     // Gentoo mariadb changes this constant for some reason.
     //WPFatal(mysql_get_client_version() == LIBMYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011.",
-    WPFatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011.",
-        mysql_get_client_info(), MYSQL_SERVER_VERSION);
+    //WPFatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011.",
+    //    mysql_get_client_info(), MYSQL_SERVER_VERSION);
 }
 
 template <class T>
