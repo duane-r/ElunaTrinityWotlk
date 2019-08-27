@@ -311,11 +311,11 @@ class spell_pal_avenging_wrath : public SpellScriptLoader
             void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
-                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(SPELL_PALADIN_SANCTIFIED_WRATH_TALENT_R1, EFFECT_2))
+                if (AuraEffect const* sanctifiedWrathAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PALADIN_SANCTIFIED_WRATH_TALENT_R1, EFFECT_2))
                 {
-                    CastSpellExtraArgs args(aurEff);
-                    args.AddSpellMod(SPELLVALUE_BASE_POINT0, aurEff->GetAmount())
-                        .AddSpellMod(SPELLVALUE_BASE_POINT1, aurEff->GetAmount());
+                    CastSpellExtraArgs args(sanctifiedWrathAurEff);
+                    args.AddSpellMod(SPELLVALUE_BASE_POINT0, sanctifiedWrathAurEff->GetAmount())
+                        .AddSpellMod(SPELLVALUE_BASE_POINT1, sanctifiedWrathAurEff->GetAmount());
                     target->CastSpell(target, SPELL_PALADIN_SANCTIFIED_WRATH, args);
                 }
 
@@ -393,7 +393,7 @@ class spell_pal_blessing_of_faith : public SpellScriptLoader
                 if (Unit* unitTarget = GetHitUnit())
                 {
                     uint32 spell_id = 0;
-                    switch (unitTarget->getClass())
+                    switch (unitTarget->GetClass())
                     {
                         case CLASS_DRUID:
                             spell_id = SPELL_PALADIN_BLESSING_OF_LOWER_CITY_DRUID;
@@ -2319,7 +2319,7 @@ class spell_pal_t3_6p_bonus : public SpellScriptLoader
                 Unit* caster = eventInfo.GetActor();
                 Unit* target = eventInfo.GetProcTarget();
 
-                switch (target->getClass())
+                switch (target->GetClass())
                 {
                     case CLASS_PALADIN:
                     case CLASS_PRIEST:

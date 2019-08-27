@@ -559,6 +559,10 @@ class boss_the_lich_king : public CreatureScript
                     frostmourne->DespawnOrUnsummon();
                 me->GetMap()->SetZoneOverrideLight(AREA_ICECROWN_CITADEL, LIGHT_FOG, 5000);
                 me->GetMap()->SetZoneWeather(AREA_ICECROWN_CITADEL, WEATHER_STATE_FOG, 0.0f);
+
+                if (Is25ManRaid())
+                    if (Player* player = me->GetLootRecipient())
+                        player->RewardPlayerAndGroupAtEvent(NPC_THE_LICH_KING_QUEST, player);
             }
 
             void JustEngagedWith(Unit* target) override
@@ -1400,7 +1404,7 @@ class npc_raging_spirit : public CreatureScript
                 DoCast(me, SPELL_PLAGUE_AVOIDANCE, true);
                 DoCast(me, SPELL_RAGING_SPIRIT_VISUAL, true);
                 if (TempSummon* summon = me->ToTempSummon())
-                    if (Unit* summoner = summon->GetSummoner())
+                    if (Unit* summoner = summon->GetSummonerUnit())
                         summoner->CastSpell(me, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
                 DoCast(me, SPELL_BOSS_HITTIN_YA, true);
             }
@@ -1418,7 +1422,7 @@ class npc_raging_spirit : public CreatureScript
                 }
             }
 
-            void IsSummonedBy(Unit* /*summoner*/) override
+            void IsSummonedBy(WorldObject* /*summoner*/) override
             {
                 // player is the spellcaster so register summon manually
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_THE_LICH_KING)))
@@ -1497,7 +1501,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
             }
 
-            void IsSummonedBy(Unit* /*summoner*/) override
+            void IsSummonedBy(WorldObject* /*summoner*/) override
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2500ms);
@@ -1647,8 +1651,11 @@ class npc_strangulate_vehicle : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* summoner) override
+            void IsSummonedBy(WorldObject* summonerWO) override
             {
+                Unit* summoner = summonerWO->ToUnit();
+                if (!summoner)
+                    return;
                 me->SetFacingToObject(summoner);
                 DoCast(summoner, SPELL_HARVEST_SOUL_VEHICLE);
                 _events.Reset();
@@ -1667,7 +1674,7 @@ class npc_strangulate_vehicle : public CreatureScript
 
                 if (TempSummon* summ = me->ToTempSummon())
                 {
-                    if (Unit* summoner = summ->GetSummoner())
+                    if (Unit* summoner = summ->GetSummonerUnit())
                     {
                         DoCast(summoner, SPELL_HARVEST_SOUL_TELEPORT_BACK);
                         summoner->RemoveAurasDueToSpell(SPELL_HARVEST_SOUL_DAMAGE_AURA);
@@ -1694,7 +1701,7 @@ class npc_strangulate_vehicle : public CreatureScript
                             me->GetMotionMaster()->MoveIdle();
                             if (TempSummon* summ = me->ToTempSummon())
                             {
-                                if (Unit* summoner = summ->GetSummoner())
+                                if (Unit* summoner = summ->GetSummonerUnit())
                                 {
                                     summoner->CastSpell(nullptr, SPELL_HARVEST_SOUL_VISUAL, true);
                                     summoner->ExitVehicle(summoner);
@@ -1793,8 +1800,8 @@ class npc_terenas_menethil : public CreatureScript
                 if (!me->IsAlive())
                     return;
 
-                me->GetThreatManager().ClearAllThreat();
                 me->CombatStop(false);
+                EngagementOver();
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) override
@@ -1818,7 +1825,7 @@ class npc_terenas_menethil : public CreatureScript
                 }
             }
 
-            void IsSummonedBy(Unit* /*summoner*/) override
+            void IsSummonedBy(WorldObject* /*summoner*/) override
             {
                 _events.Reset();
                 _events.SetPhase(PHASE_OUTRO);
@@ -1966,7 +1973,7 @@ class npc_spirit_bomb : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* /*summoner*/) override
+            void IsSummonedBy(WorldObject* /*summoner*/) override
             {
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
@@ -2027,7 +2034,7 @@ class npc_broken_frostmourne : public CreatureScript
                 _events.Reset();
             }
 
-            void IsSummonedBy(Unit* /*summoner*/) override
+            void IsSummonedBy(WorldObject* /*summoner*/) override
             {
                 _events.SetPhase(PHASE_OUTRO);
                 _events.ScheduleEvent(EVENT_OUTRO_KNOCK_BACK, 3s, 0, PHASE_OUTRO);
@@ -2187,8 +2194,11 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                 targets.resize(1);
             }
 
-            void CheckAura()
+            void CheckAura(SpellMissInfo missInfo)
             {
+                if (missInfo != SPELL_MISS_NONE)
+                    return;
+
                 if (GetHitUnit()->HasAura(GetSpellInfo()->Id))
                     _hadAura = true;
             }
@@ -2202,7 +2212,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
             void Register() override
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_the_lich_king_necrotic_plague_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-                BeforeHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::CheckAura);
+                BeforeHit += BeforeSpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::CheckAura);
                 OnHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::AddMissingStack);
             }
 
@@ -2836,7 +2846,7 @@ class spell_the_lich_king_vile_spirit_damage_target_search : public SpellScriptL
                 // this spell has SPELL_AURA_BLOCK_SPELL_FAMILY so every next cast of this
                 // searcher spell will be blocked
                 if (TempSummon* summon = GetCaster()->ToTempSummon())
-                    if (Unit* summoner = summon->GetSummoner())
+                    if (Unit* summoner = summon->GetSummonerUnit())
                         summoner->GetAI()->SetData(DATA_VILE, 1);
                 GetCaster()->CastSpell(nullptr, SPELL_SPIRIT_BURST, true);
                 GetCaster()->ToCreature()->DespawnOrUnsummon(3000);
@@ -2998,8 +3008,11 @@ class spell_the_lich_king_restore_soul : public SpellScriptLoader
                 }
             }
 
-            void RemoveAura()
+            void RemoveAura(SpellMissInfo missInfo)
             {
+                if (missInfo != SPELL_MISS_NONE)
+                    return;
+
                 if (Unit* target = GetHitUnit())
                     target->RemoveAurasDueToSpell(target->GetMap()->IsHeroic() ? SPELL_HARVEST_SOULS_TELEPORT : SPELL_HARVEST_SOUL_TELEPORT);
             }
@@ -3007,7 +3020,7 @@ class spell_the_lich_king_restore_soul : public SpellScriptLoader
             void Register() override
             {
                 OnEffectHit += SpellEffectFn(spell_the_lich_king_restore_soul_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-                BeforeHit += SpellHitFn(spell_the_lich_king_restore_soul_SpellScript::RemoveAura);
+                BeforeHit += BeforeSpellHitFn(spell_the_lich_king_restore_soul_SpellScript::RemoveAura);
             }
 
             InstanceScript* _instance;

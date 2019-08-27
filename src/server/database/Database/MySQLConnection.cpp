@@ -155,8 +155,9 @@ uint32 MySQLConnection::Open()
     else
     {
         TC_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s", m_connectionInfo.host.c_str(), mysql_error(mysqlInit));
+        uint32 errorCode = mysql_errno(mysqlInit);
         mysql_close(mysqlInit);
-        return mysql_errno(mysqlInit);
+        return errorCode;
     }
 }
 
@@ -440,7 +441,8 @@ void MySQLConnection::Unlock()
 
 MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)
 {
-    ASSERT(index < m_stmts.size());
+    ASSERT(index < m_stmts.size(), "Tried to access invalid prepared statement index %u (max index " SZFMTD ") on database `%s`, connection type: %s",
+        index, m_stmts.size(), m_connectionInfo.database.c_str(), (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
     MySQLPreparedStatement* ret = m_stmts[index].get();
     if (!ret)
         TC_LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database `%s`, connection type: %s.",
@@ -513,9 +515,8 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo, uint8 attempts /*= 5*/)
                 mysql_close(GetHandle());
                 m_Mysql = nullptr;
             }
-
-            /*no break*/
         }
+        /* fallthrough */
         case CR_CONN_HOST_ERROR:
         {
             TC_LOG_INFO("sql.sql", "Attempting to reconnect to the MySQL server...");
