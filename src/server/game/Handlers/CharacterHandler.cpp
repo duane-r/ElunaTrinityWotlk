@@ -1262,20 +1262,20 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
 
     BarberShopStyleEntry const* bs_hair = sBarberShopStyleStore.LookupEntry(Hair);
 
-    if (!bs_hair || bs_hair->type != 0 || bs_hair->race != _player->GetRace() || bs_hair->gender != _player->GetNativeGender())
+    if (!bs_hair || bs_hair->type != 0 || bs_hair->race != _player->GetMasqueradeRace() || bs_hair->gender != _player->GetNativeGender())
         return;
 
     BarberShopStyleEntry const* bs_facialHair = sBarberShopStyleStore.LookupEntry(FacialHair);
 
-    if (!bs_facialHair || bs_facialHair->type != 2 || bs_facialHair->race != _player->GetRace() || bs_facialHair->gender != _player->GetNativeGender())
+    if (!bs_facialHair || bs_facialHair->type != 2 || bs_facialHair->race != _player->GetMasqueradeRace() || bs_facialHair->gender != _player->GetNativeGender())
         return;
 
     BarberShopStyleEntry const* bs_skinColor = sBarberShopStyleStore.LookupEntry(SkinColor);
 
-    if (bs_skinColor && (bs_skinColor->type != 3 || bs_skinColor->race != _player->GetRace() || bs_skinColor->gender != _player->GetNativeGender()))
+    if (bs_skinColor && (bs_skinColor->type != 3 || bs_skinColor->race != _player->GetMasqueradeRace() || bs_skinColor->gender != _player->GetNativeGender()))
         return;
 
-    if (!Player::ValidateAppearance(_player->GetRace(), _player->GetClass(), _player->GetNativeGender(),
+    if (!Player::ValidateAppearance(_player->GetMasqueradeRace(), _player->GetClass(), _player->GetNativeGender(),
         bs_hair->hair_id, Color, _player->GetFaceId(), bs_facialHair->hair_id,
         bs_skinColor ? bs_skinColor->hair_id : _player->GetSkinId()))
         return;
@@ -1384,9 +1384,12 @@ void WorldSession::HandleCharCustomizeCallback(std::shared_ptr<CharacterCustomiz
     uint8 plrRace = fields[1].GetUInt8();
     uint8 plrClass = fields[2].GetUInt8();
     uint8 plrGender = fields[3].GetUInt8();
+    uint8 plrDisplayRace = sWorld->getBoolConfig(CONFIG_ENABLE_RACE_MASQUERADE) ? fields[5].GetUInt8() : 0;
+    if (!plrDisplayRace)
+        plrDisplayRace = plrRace;
     uint16 atLoginFlags = fields[4].GetUInt16();
 
-    if (!Player::ValidateAppearance(plrRace, plrClass, plrGender, customizeInfo->HairStyle, customizeInfo->HairColor, customizeInfo->Face, customizeInfo->FacialHair, customizeInfo->Skin, true))
+    if (!Player::ValidateAppearance(plrDisplayRace, plrClass, plrGender, customizeInfo->HairStyle, customizeInfo->HairColor, customizeInfo->Face, customizeInfo->FacialHair, customizeInfo->Skin, true))
     {
         SendCharCustomize(CHAR_CREATE_ERROR, customizeInfo.get());
         return;

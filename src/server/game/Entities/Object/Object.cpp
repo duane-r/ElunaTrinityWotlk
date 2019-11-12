@@ -3499,6 +3499,15 @@ struct WorldObjectChangeAccumulator
 void WorldObject::BuildUpdate(UpdateDataMapType& data_map)
 {
     WorldObjectChangeAccumulator notifier(*this, data_map);
+
+    // Masquerade system - ensure client gets actual race data again now that display id has returned to normal (prevent client bugs for invalid class/race combination)
+    if (Player* player = ToPlayer())
+        if (_changesMask.GetBit(UNIT_FIELD_DISPLAYID) && player->IsMasqueradingRace() && player->GetDisplayId() == player->GetNativeDisplayId())
+        {
+            _changesMask.SetBit(UNIT_FIELD_BYTES_0);
+            player->NotifyMasqueradeRaceDirty();
+        }
+
     //we must build packets for all visible players
     Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
 
