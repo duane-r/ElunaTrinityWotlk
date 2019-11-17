@@ -17268,7 +17268,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     if (!ValidateAppearance(
         GetMasqueradeRace(),
-        getClass(),
+        GetClass(),
         gender, GetHairStyleId(), GetHairColorId(), GetFaceId(), GetFacialStyle(), GetSkinId()))
     {
         TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong Appearance values (Hair/Skin/Color), can't load.", guid.ToString().c_str());
@@ -21580,8 +21580,8 @@ void Player::InitDataForForm(bool reapplyMods)
 void Player::InitDisplayIds()
 {
     Races masqueradeRace = GetMasqueradeRace();
-    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(masqueradeRace, getClass());
-    if (!info && masqueradeRace != getRace())
+    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(masqueradeRace, GetClass());
+    if (!info && masqueradeRace != GetRace())
         info = sObjectMgr->GetPlayerInfo(masqueradeRace, (masqueradeRace == RACE_DRAENEI || masqueradeRace == RACE_BLOODELF) ? CLASS_PALADIN : CLASS_WARRIOR);
 
     if (!info)
@@ -24449,7 +24449,7 @@ void Player::SetMasqueradeRace(Races race)
 Races Player::GetMasqueradeRace() const
 {
     if (!m_masqueradeRace)
-        return Races(getRace());
+        return Races(GetRace());
     return m_masqueradeRace;
 }
 
