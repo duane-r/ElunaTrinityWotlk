@@ -76,10 +76,10 @@ class custom_make_instances_easier : public PlayerScript, UnitScript
             if (count > 3)
                 return;
 
-            uint32 mult = 5;
+            uint32 mult = 3;
 
             if (count == 1)
-                mult = 20;
+                mult = 5;
 
             //printf("experience lowered from %d to %d\n", amount, amount / 5);
             amount /= mult;
